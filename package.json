@@ -7,7 +7,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ./",
     "pre-commit": "npm t",
-    "posttest": "npm run lint"
+    "posttest": "npm run lint",
+    "view": "psql -f ./view.sql > view.txt",
+    "create:config": "knex init",
+    "create:seed": "knex seed:make seed",
+    "seed:db": "knex seed:run",
+    "migrate:make": "knex migrate:make",
+    "migrate:latest": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback"
   },
   "repository": {
     "type": "git",

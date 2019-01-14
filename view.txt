@@ -1,0 +1,12 @@
+You are now connected to database "nc_knews" as user "mohamed".
+                List of relations
+ Schema |         Name         | Type  |  Owner  
+--------+----------------------+-------+---------
+ public | articles             | table | mohamed
+ public | comments             | table | mohamed
+ public | knex_migrations      | table | mohamed
+ public | knex_migrations_lock | table | mohamed
+ public | topics               | table | mohamed
+ public | users                | table | mohamed
+(6 rows)
+
