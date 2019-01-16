@@ -3,16 +3,20 @@ const connection = require('../db/connection');
 const getTopics = (req, res, next) => {
   connection('topics')
     .select('*')
-    .then(topics => res.status(200).send({ topics }))
+    .then((topics) => {
+      res.status(200).send({ topics });
+    })
     .catch(next);
 };
 const postTopic = (req, res, next) => {
+  console.log('controller');
   connection('topics')
     .insert(req.body)
     .returning('*')
     .then(([topic]) => {
       res.status(201).send(topic);
-    });
+    })
+    .catch(next);
 };
 const getArticlesByTopic = (req, res, next) => {
   const { topic } = req.params;
@@ -38,12 +42,13 @@ const getArticlesByTopic = (req, res, next) => {
     .count('comments.comment_id as comment_count')
     .groupBy('articles.article_id')
     .then((articles) => {
+      if (articles.length < 1) return Promise.reject({ status: 404, message: 'Page not found!' });
       res.status(200).send(articles);
     })
-    .catch();
+    .catch(next);
 };
 
-const postArticleByArticle = (req, res, next) => {
+const postArticleByTopic = (req, res, next) => {
   const { topic } = req.params;
   req.body.topic = topic;
   connection('articles')
@@ -51,12 +56,13 @@ const postArticleByArticle = (req, res, next) => {
     .returning('*')
     .then(([article]) => {
       res.status(201).send(article);
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
   getTopics,
   postTopic,
   getArticlesByTopic,
-  postArticleByArticle,
+  postArticleByTopic,
 };

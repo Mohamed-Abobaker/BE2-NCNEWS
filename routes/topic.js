@@ -3,11 +3,11 @@ const {
   getTopics,
   postTopic,
   getArticlesByTopic,
-  postArticleByArticle,
+  postArticleByTopic,
 } = require('../controllers/conTopics');
 
 topicRouter.get('/', getTopics);
 topicRouter.post('/', postTopic);
 topicRouter.get('/:topic/articles', getArticlesByTopic);
-topicRouter.post('/:topic/articles', postArticleByArticle);
+topicRouter.post('/:topic/articles', postArticleByTopic);
 module.exports = topicRouter;
