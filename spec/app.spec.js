@@ -163,9 +163,11 @@ describe('/api', () => {
       .get('/api/articles/1')
       .expect(200)
       .then(({ body }) => {
-        expect(body).to.haveOwnProperty('article_id');
+        const { article } = body;
+        console.log(article);
+        expect(article).to.haveOwnProperty('article_id');
       }));
-    it('POST status: 400 when invalid article_id used', () => request
+    it('GET status: 400 when invalid article_id used', () => request
       .get('/api/articles/mike')
       .expect(400)
       .then(({ body }) => {
@@ -173,11 +175,37 @@ describe('/api', () => {
           'error: select "articles"."username" as "author", "articles"."title", "articles"."article_id", "articles"."body", "articles"."votes", "articles"."created_at", "articles"."topic", count("comments"."comment_id") as "comment_count" from "articles" left join "comments" on "articles"."article_id" = "comments"."article_id" where "articles"."article_id" = $1 group by "articles"."article_id" - invalid input syntax for integer: "mike"',
         );
       }));
-    it.only('POST status: 404 when articles_id does not exist ', () => request
+    it('GET status: 404 when articles_id does not exist ', () => request
       .get('/api/articles/700')
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).to.eql('Page not found!');
+      }));
+  });
+  describe('PATCH /api/articles/:article_id', () => {
+    it('PATCH status:200 & updates the articles.votes ', () => request
+      .patch('/api/articles/1')
+      .send({ inc_votes: 77 })
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).to.eql(177);
+      }));
+    it('PATCH status: 404 when articles_id does not exist ', () => request
+      .patch('/api/articles/700')
+      .send({ inc_votes: 77 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
+      }));
+    it('PATCH status: 400 when invalid article_id used', () => request
+      .patch('/api/articles/mike')
+      .send({ inc_votes: 77 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: update "articles" set "votes" = "votes" + 77 where "articles"."article_id" = $1 returning * - invalid input syntax for integer: "mike"',
+        );
       }));
   });
 });

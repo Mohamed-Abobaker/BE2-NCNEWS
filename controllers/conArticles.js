@@ -44,11 +44,25 @@ const getArticleById = (req, res, next) => {
     .count('comments.comment_id as comment_count')
     .groupBy('articles.article_id')
     .where('articles.article_id', article_id)
-    .then((article) => {
-      if (article.length < 1) return Promise.reject({ status: 404, msg: 'Page not found!' });
-      res.status(200).send([article]);
+    .then(([article]) => {
+      if (!article) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(200).send({ article });
     })
     .catch(next);
 };
 
-module.exports = { getArticles, getArticleById };
+const patchVotesByArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+  connection('articles')
+    .where('articles.article_id', article_id)
+    .increment('votes', inc_votes)
+    .returning('*')
+    .then(([article]) => {
+      if (!article) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+module.exports = { getArticles, getArticleById, patchVotesByArticle };
