@@ -65,4 +65,21 @@ const patchVotesByArticle = (req, res, next) => {
     .catch(next);
 };
 
-module.exports = { getArticles, getArticleById, patchVotesByArticle };
+const deleteArticleById = (req, res, next) => {
+  const { article_id } = req.params;
+  connection('articles')
+    .where('articles.article_id', article_id)
+    .del()
+    .returning('*')
+    .then((result) => {
+      console.log(result);
+      res.status(204);
+    });
+};
+
+module.exports = {
+  getArticles,
+  getArticleById,
+  patchVotesByArticle,
+  deleteArticleById,
+};

@@ -208,4 +208,13 @@ describe('/api', () => {
         );
       }));
   });
+  describe('DELETE /api/articles/:article_id', () => {
+    it.only('DELETE status: 204 & responds with no-content', () => request
+      .delete('/api/articles/1')
+      .expect(204)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body).to.eql({});
+      }));
+  });
 });
