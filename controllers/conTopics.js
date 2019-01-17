@@ -21,7 +21,7 @@ const postTopic = (req, res, next) => {
 const getArticlesByTopic = (req, res, next) => {
   const { topic } = req.params;
   const {
-    limit = 10, sort_by = 'created_at', order = 'desc', p = 0, ...restOf
+    limit = 10, sort_by = 'created_at', order = 'desc', p = 0,
   } = req.query;
   const page = p ? (p - 1) * limit : 0;
   connection
@@ -55,6 +55,7 @@ const postArticleByTopic = (req, res, next) => {
     .insert(req.body)
     .returning('*')
     .then(([article]) => {
+      if (!article) return Promise.reject({ status: 404, msg: 'Page not found!' });
       res.status(201).send(article);
     })
     .catch(next);

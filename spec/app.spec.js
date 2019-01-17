@@ -209,12 +209,191 @@ describe('/api', () => {
       }));
   });
   describe('DELETE /api/articles/:article_id', () => {
-    it.only('DELETE status: 204 & responds with no-content', () => request
+    it('DELETE status: 204 & responds with no-content', () => request
       .delete('/api/articles/1')
       .expect(204)
+      .then(() => request.get('/api/articles?limit=100').expect(200))
       .then(({ body }) => {
-        console.log(body);
-        expect(body).to.eql({});
+        expect(body).to.have.length(11);
+      }));
+  });
+  describe('GET /api/articles/:article_id/comments', () => {
+    it('GET status:200 & responds with an array of comment objects', () => request
+      .get('/api/articles/1/comments?limit=100')
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).to.equal(13);
+        expect(comments[0].article_id).to.eql(1);
+        expect(comments[0]).to.have.all.keys(
+          'body',
+          'author',
+          'article_id',
+          'votes',
+          'created_at',
+        );
+      }));
+    it('GET status:200 & responds with an array of comment objects using limit, page, sort_by & order', () => request
+      .get('/api/articles/1/comments?limit=2&p=6&order=asc&sort_by=votes')
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).to.equal(2);
+        expect(comments[0].votes).to.eql(14);
+      }));
+    it('GET Status:400 when invlaid ID used', () => request
+      .get('/api/articles/abc/comments')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: select "comments"."username" as "author", "comments"."body", "comments"."article_id", "comments"."votes", "comments"."created_at" from "comments" where "article_id" = $1 order by "created_at" desc limit $2 - invalid input syntax for integer: "abc"',
+        );
+      }));
+    it('GET Status:404 when article id does not exist', () => request
+      .get('/api/articles/700/comments')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
+      }));
+  });
+  describe('POST /api/articles/:article_id/comments', () => {
+    it('POST status:201 & responds with the posted comment', () => request
+      .post('/api/articles/3/comments')
+      .send({
+        body: 'This is a short comment.',
+        username: 'butter_bridge',
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body).to.be.an('object');
+        expect(body).to.have.all.keys(
+          'body',
+          'username',
+          'article_id',
+          'comment_id',
+          'votes',
+          'created_at',
+        );
+        expect(body.username).to.eql('butter_bridge');
+      }));
+    it('POST status: 400 when wrong key is posted', () => request
+      .post('/api/articles/3/comments')
+      .send({
+        body: 'This is a short comment.',
+        commentee: 'butter_bridge',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: insert into "comments" ("article_id", "body", "commentee") values ($1, $2, $3) returning * - column "commentee" of relation "comments" does not exist',
+        );
+      }));
+    it('POST status: 404 when un-used article_id used', () => request
+      .post('/api/articles/700/comments')
+      .send({
+        body: 'This is a short comment.',
+        username: 'butter_bridge',
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Page not found!',
+        );
+      }));
+    it('POST status: 400 when invalid article_id used', () => request
+      .post('/api/articles/abc/comments')
+      .send({
+        body: 'This is a short comment.',
+        username: 'butter_bridge',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: insert into "comments" ("article_id", "body", "username") values ($1, $2, $3) returning * - invalid input syntax for integer: "abc"',
+        );
+      }));
+  });
+  describe('PATCH /api/articles/:article_id/comments/:comment_id', () => {
+    it('PATCH status:200 & updates the comment.votes for particular comment_id ', () => request
+      .patch('/api/articles/9/comments/1')
+      .send({ inc_votes: 77 })
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.votes).to.eql(93);
+      }));
+    it('PATCH status: 404 when articles_id does not exist ', () => request
+      .patch('/api/articles/700/comments/1')
+      .send({ inc_votes: 77 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
+      }));
+    it('PATCH status: 400 when invalid article_id used', () => request
+      .patch('/api/articles/mike/comments/1')
+      .send({ inc_votes: 77 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: update "comments" set "votes" = "votes" + 77 where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "mike"',
+        );
+      }));
+    it('PATCH status: 404 when comment_id does not exist ', () => request
+      .patch('/api/articles/1/comments/700')
+      .send({ inc_votes: 77 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
+      }));
+    it('PATCH status: 400 when invalid comments_id used', () => request
+      .patch('/api/articles/1/comments/abc')
+      .send({ inc_votes: 77 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: update "comments" set "votes" = "votes" + 77 where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
+        );
+      }));
+  });
+  describe('DELETE /api/articles/:article_id/comments/:comment_id', () => {
+    it.only('DELETE status: 204 & responds with no-content', () => request
+      .delete('/api/articles/9/comments/1')
+      .expect(204)
+      .then(() => request.get('/api/articles/9/comments').expect(200))
+      .then(({ body }) => {
+        expect(body.comments).to.have.length(1);
+      }));
+    it.only('DELETE status: 400 when comment_id is invalid', () => request
+      .delete('/api/articles/9/comments/abc')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: delete from "comments" where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
+        );
+      }));
+    it.only('DELETE status: 404 when comment_id is not used', () => request
+      .delete('/api/articles/9/comments/700')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Page not found!',
+        );
+      }));
+    it.only('DELETE status: 404 when article_id is not used', () => request
+      .delete('/api/articles/700/comments/1')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Page not found!',
+        );
+      }));
+    it.only('DELETE status: 400 when article_id is invalid', () => request
+      .delete('/api/articles/abc/comments/1')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: delete from "comments" where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
+        );
       }));
   });
 });

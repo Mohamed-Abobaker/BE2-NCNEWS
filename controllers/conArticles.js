@@ -72,9 +72,86 @@ const deleteArticleById = (req, res, next) => {
     .del()
     .returning('*')
     .then((result) => {
-      console.log(result);
-      res.status(204);
-    });
+      res.status(204).send(result);
+    })
+    .catch(next);
+};
+
+const getCommentsByArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const {
+    limit = 10, sort_by = 'created_at', order = 'desc', p = 0,
+  } = req.query;
+  const page = p ? (p - 1) * limit : 0;
+  connection
+    .select(
+      'comments.username as author',
+      'comments.body',
+      'comments.article_id',
+      'comments.votes',
+      'comments.created_at',
+    )
+    .from('comments')
+    .where('article_id', article_id)
+    .limit(limit)
+    .orderBy(sort_by, order)
+    .offset(page)
+    .then((comments) => {
+      if (!comments[0]) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(200).send({ comments });
+    })
+    .catch(next);
+};
+
+const postCommentByArticle_id = (req, res, next) => {
+  const { article_id } = req.params;
+  req.body.article_id = article_id;
+  connection('comments')
+    .insert(req.body)
+    .returning('*')
+    .then(([comment]) => {
+      console.log('comment', comment);
+      if (!comment) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(201).send(comment);
+    })
+    .catch(next);
+};
+
+const patchCommentById = (req, res, next) => {
+  const { article_id } = req.params;
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+
+  connection('comments')
+    .where({
+      article_id,
+      comment_id,
+    })
+    .increment('votes', inc_votes)
+    .returning('*')
+    .then(([comment]) => {
+      if (!comment) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(200).send({ comment });
+    })
+    .catch(next);
+};
+
+const deleteCommentById = (req, res, next) => {
+  const { article_id } = req.params;
+  const { comment_id } = req.params;
+
+  connection('comments')
+    .where({
+      article_id,
+      comment_id,
+    })
+    .del()
+    .returning('*')
+    .then(([deletedComment]) => {
+      if (!deletedComment) return Promise.reject({ status: 404, msg: 'Page not found!' });
+      res.status(204).send(deletedComment);
+    })
+    .catch(next);
 };
 
 module.exports = {
@@ -82,4 +159,8 @@ module.exports = {
   getArticleById,
   patchVotesByArticle,
   deleteArticleById,
+  getCommentsByArticle,
+  postCommentByArticle_id,
+  patchCommentById,
+  deleteCommentById,
 };

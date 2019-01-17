@@ -1,4 +1,7 @@
 exports.handle400 = (err, req, res, next) => {
+  if (err.constraint == 'comments_article_id_foreign') {
+    res.status(404).send({ status: 404, msg: 'Page not found!' });
+  }
   console.log('reached 400 handler', err);
   const codes400 = ['23502', '22P02', '42703', '23503'];
   if (codes400.includes(err.code)) {
