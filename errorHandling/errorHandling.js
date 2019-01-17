@@ -15,3 +15,9 @@ exports.handle404 = (err, req, res, next) => {
     res.status(404).send(err);
   }
 };
+
+exports.handle405 = (req, res, next) => {
+  res.status(405).send({
+    msg: 'Invalid method for this endpoint',
+  });
+};

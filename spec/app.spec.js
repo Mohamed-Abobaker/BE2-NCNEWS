@@ -417,11 +417,10 @@ describe('/api', () => {
       }));
   });
   describe('GET /api', () => {
-    it.only('GET status:200 responds with an object containing the endpoints info', () => request
+    it('GET status:200 responds with an object containing the endpoints info', () => request
       .get('/api')
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(body).to.have.all.keys(
           'DELETE /api/articles/:article_id',
           'DELETE /api/articles/:article_id/comments/:comment_id',
