@@ -296,9 +296,7 @@ describe('/api', () => {
       })
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Page not found!',
-        );
+        expect(body.msg).to.eql('Page not found!');
       }));
     it('POST status: 400 when invalid article_id used', () => request
       .post('/api/articles/abc/comments')
@@ -356,14 +354,14 @@ describe('/api', () => {
       }));
   });
   describe('DELETE /api/articles/:article_id/comments/:comment_id', () => {
-    it.only('DELETE status: 204 & responds with no-content', () => request
+    it('DELETE status: 204 & responds with no-content', () => request
       .delete('/api/articles/9/comments/1')
       .expect(204)
       .then(() => request.get('/api/articles/9/comments').expect(200))
       .then(({ body }) => {
         expect(body.comments).to.have.length(1);
       }));
-    it.only('DELETE status: 400 when comment_id is invalid', () => request
+    it('DELETE status: 400 when comment_id is invalid', () => request
       .delete('/api/articles/9/comments/abc')
       .expect(400)
       .then(({ body }) => {
@@ -371,28 +369,74 @@ describe('/api', () => {
           'error: delete from "comments" where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
         );
       }));
-    it.only('DELETE status: 404 when comment_id is not used', () => request
+    it('DELETE status: 404 when comment_id is not used', () => request
       .delete('/api/articles/9/comments/700')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Page not found!',
-        );
+        expect(body.msg).to.eql('Page not found!');
       }));
-    it.only('DELETE status: 404 when article_id is not used', () => request
+    it('DELETE status: 404 when article_id is not used', () => request
       .delete('/api/articles/700/comments/1')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Page not found!',
-        );
+        expect(body.msg).to.eql('Page not found!');
       }));
-    it.only('DELETE status: 400 when article_id is invalid', () => request
+    it('DELETE status: 400 when article_id is invalid', () => request
       .delete('/api/articles/abc/comments/1')
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).to.eql(
           'error: delete from "comments" where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
+        );
+      }));
+  });
+  describe('GET /api/users', () => {
+    it('GET status: 200 & responds with an array of user objects', () => request
+      .get('/api/users')
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body.users).to.be.an('array');
+        expect(body.users).to.have.length(3);
+      }));
+  });
+  describe('GET /api/users/:username', () => {
+    it('GET Status: 200 & responds with a user object', () => request
+      .get('/api/users/butter_bridge')
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user.name).to.eql('jonny');
+        expect(user).to.have.all.keys('name', 'avatar_url', 'username');
+      }));
+    it('GET Status:404 when unused username used', () => request
+      .get('/api/users/michael')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
+      }));
+  });
+  describe('GET /api', () => {
+    it.only('GET status:200 responds with an object containing the endpoints info', () => request
+      .get('/api')
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body).to.have.all.keys(
+          'DELETE /api/articles/:article_id',
+          'DELETE /api/articles/:article_id/comments/:comment_id',
+          'GET /api/articles',
+          'GET /api/articles/:article_id',
+          'GET /api/articles/:article_id/comments',
+          'GET /api/topics',
+          'GET /api/topics/:topic/articles',
+          'GET /api/users',
+          'GET /api/users/:username',
+          'PATCH /api/articles/:article_id',
+          'PATCH /api/articles/:article_id/comments/:comment_id',
+          'POST /api/articles/:article_id/comments',
+          'POST /api/topics',
+          'POST /api/topics/:topic/articles',
         );
       }));
   });
