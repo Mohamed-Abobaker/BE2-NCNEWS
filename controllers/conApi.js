@@ -1,5 +1,3 @@
-const connection = require('../db/connection');
-
 const paths = {
   'GET /api/topics': 'responds with an array of topic objects',
   'POST /api/topics': 'responds with the posted topic object',

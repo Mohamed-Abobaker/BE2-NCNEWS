@@ -8,16 +8,18 @@ const getTopics = (req, res, next) => {
     })
     .catch(next);
 };
+
 const postTopic = (req, res, next) => {
   console.log('controller');
   connection('topics')
     .insert(req.body)
     .returning('*')
     .then(([topic]) => {
-      res.status(201).send(topic);
+      res.status(201).send({ topic });
     })
     .catch(next);
 };
+
 const getArticlesByTopic = (req, res, next) => {
   const { topic } = req.params;
   const {
@@ -43,7 +45,7 @@ const getArticlesByTopic = (req, res, next) => {
     .groupBy('articles.article_id')
     .then((articles) => {
       if (articles.length < 1) return Promise.reject({ status: 404, message: 'Page not found!' });
-      res.status(200).send(articles);
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
@@ -56,7 +58,7 @@ const postArticleByTopic = (req, res, next) => {
     .returning('*')
     .then(([article]) => {
       if (!article) return Promise.reject({ status: 404, msg: 'Page not found!' });
-      res.status(201).send(article);
+      res.status(201).send({ article });
     })
     .catch(next);
 };

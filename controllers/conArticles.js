@@ -23,7 +23,7 @@ const getArticles = (req, res, next) => {
     .count('comments.comment_id as comment_count')
     .groupBy('articles.article_id')
     .then((articles) => {
-      res.status(200).send(articles);
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
@@ -110,9 +110,8 @@ const postCommentByArticle_id = (req, res, next) => {
     .insert(req.body)
     .returning('*')
     .then(([comment]) => {
-      console.log('comment', comment);
       if (!comment) return Promise.reject({ status: 404, msg: 'Page not found!' });
-      res.status(201).send(comment);
+      res.status(201).send({ comment });
     })
     .catch(next);
 };

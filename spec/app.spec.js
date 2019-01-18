@@ -21,13 +21,6 @@ describe('/api', () => {
         expect(body.topics).to.be.an('array');
         expect(body.topics).to.have.length(2);
       }));
-    // it.only('GET status: 404 & responds with an error message', () => request
-    //   .get('/api/topic')
-    //   .expect(404)
-    //   .then(({ body }) => {
-    //     console.log('body', body);
-    //     expect(body.message).to.eql('Page not found!');
-    //   }));
   });
   describe('POST api/topics', () => {
     it('POST status: 201 & responds newly posted topic', () => request
@@ -38,8 +31,9 @@ describe('/api', () => {
       })
       .expect(201)
       .then(({ body }) => {
-        expect(body).to.be.an('object');
-        expect(body).to.have.all.keys('slug', 'description');
+        const { topic } = body;
+        expect(topic).to.be.an('object');
+        expect(topic).to.have.all.keys('slug', 'description');
       }));
     it('POST status: 400 when wrong key is inserted', () => request
       .post('/api/topics')
@@ -59,8 +53,9 @@ describe('/api', () => {
       .get('/api/topics/mitch/articles?sort_by=article_id&&limit=5')
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).to.equal(5);
-        expect(body[0].article_id).to.eql(12);
+        const { articles } = body;
+        expect(articles.length).to.equal(5);
+        expect(articles[0].article_id).to.eql(12);
       }));
     it('GET status:404 & responds with an error message', () => request
       .get('/api/topics/mike/articles')
@@ -72,8 +67,9 @@ describe('/api', () => {
       .get('/api/topics/mitch/articles?sort_by=article_id&&limit=3&&p=2&&order=asc')
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).to.equal(3);
-        expect(body[0].article_id).to.eql(4);
+        const { articles } = body;
+        expect(articles.length).to.equal(3);
+        expect(articles[0].article_id).to.eql(4);
         expect();
       }));
   });
@@ -87,8 +83,9 @@ describe('/api', () => {
       })
       .expect(201)
       .then(({ body }) => {
-        expect(body).to.be.an('object');
-        expect(body).to.have.all.keys(
+        const { article } = body;
+        expect(article).to.be.an('object');
+        expect(article).to.have.all.keys(
           'body',
           'title',
           'username',
@@ -97,7 +94,7 @@ describe('/api', () => {
           'topic',
           'created_at',
         );
-        expect(body.title).to.eql('Northocder awards');
+        expect(article.title).to.eql('Northocder awards');
       }));
     it('POST status: 400 when wrong key is inserted', () => request
       .post('/api/topics/mitch/articles')
@@ -131,8 +128,9 @@ describe('/api', () => {
       .get('/api/articles?limit=100')
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).to.equal(12);
-        expect(body[0]).to.have.all.keys(
+        const { articles } = body;
+        expect(articles.length).to.equal(12);
+        expect(articles[0]).to.have.all.keys(
           'body',
           'title',
           'author',
@@ -147,15 +145,17 @@ describe('/api', () => {
       .get('/api/articles?sort_by=article_id&order=asc')
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).to.equal(10);
-        expect(body[9].article_id).to.eql(10);
+        const { articles } = body;
+        expect(articles.length).to.equal(10);
+        expect(articles[9].article_id).to.eql(10);
       }));
     it('GET status:200 & responds with the second page of array of article objects limited to 2 a page ', () => request
       .get('/api/articles?p=2&limit=2')
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).to.equal(2);
-        expect(body[1].article_id).to.eql(4);
+        const { articles } = body;
+        expect(articles.length).to.equal(2);
+        expect(articles[1].article_id).to.eql(4);
       }));
   });
   describe('GET /api/articles/:article_id', () => {
@@ -214,7 +214,8 @@ describe('/api', () => {
       .expect(204)
       .then(() => request.get('/api/articles?limit=100').expect(200))
       .then(({ body }) => {
-        expect(body).to.have.length(11);
+        const { articles } = body;
+        expect(articles).to.have.length(11);
       }));
   });
   describe('GET /api/articles/:article_id/comments', () => {
@@ -265,8 +266,9 @@ describe('/api', () => {
       })
       .expect(201)
       .then(({ body }) => {
-        expect(body).to.be.an('object');
-        expect(body).to.have.all.keys(
+        const { comment } = body;
+        expect(comment).to.be.an('object');
+        expect(comment).to.have.all.keys(
           'body',
           'username',
           'article_id',
@@ -274,7 +276,7 @@ describe('/api', () => {
           'votes',
           'created_at',
         );
-        expect(body.username).to.eql('butter_bridge');
+        expect(comment.username).to.eql('butter_bridge');
       }));
     it('POST status: 400 when wrong key is posted', () => request
       .post('/api/articles/3/comments')
@@ -436,6 +438,30 @@ describe('/api', () => {
           'POST /api/articles/:article_id/comments',
           'POST /api/topics',
           'POST /api/topics/:topic/articles',
+        );
+      }));
+    it('DELETE status:405 and responds with Invalid method for this endpoint', () => request
+      .delete('/api')
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Invalid method for this endpoint',
+        );
+      }));
+    it('PATCH status:405 and responds with Invalid method for this endpoint', () => request
+      .patch('/api')
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Invalid method for this endpoint',
+        );
+      }));
+    it('POST status:405 and responds with Invalid method for this endpoint', () => request
+      .post('/api')
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'Invalid method for this endpoint',
         );
       }));
   });
