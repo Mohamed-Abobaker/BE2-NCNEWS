@@ -10,7 +10,6 @@ const getTopics = (req, res, next) => {
 };
 
 const postTopic = (req, res, next) => {
-  console.log('controller');
   connection('topics')
     .insert(req.body)
     .returning('*')

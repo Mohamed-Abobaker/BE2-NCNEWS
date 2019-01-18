@@ -164,7 +164,6 @@ describe('/api', () => {
       .expect(200)
       .then(({ body }) => {
         const { article } = body;
-        console.log(article);
         expect(article).to.haveOwnProperty('article_id');
       }));
     it('GET status: 400 when invalid article_id used', () => request
@@ -397,7 +396,6 @@ describe('/api', () => {
       .get('/api/users')
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(body.users).to.be.an('array');
         expect(body.users).to.have.length(3);
       }));
@@ -444,25 +442,19 @@ describe('/api', () => {
       .delete('/api')
       .expect(405)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Invalid method for this endpoint',
-        );
+        expect(body.msg).to.eql('Invalid method for this endpoint');
       }));
     it('PATCH status:405 and responds with Invalid method for this endpoint', () => request
       .patch('/api')
       .expect(405)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Invalid method for this endpoint',
-        );
+        expect(body.msg).to.eql('Invalid method for this endpoint');
       }));
     it('POST status:405 and responds with Invalid method for this endpoint', () => request
       .post('/api')
       .expect(405)
       .then(({ body }) => {
-        expect(body.msg).to.eql(
-          'Invalid method for this endpoint',
-        );
+        expect(body.msg).to.eql('Invalid method for this endpoint');
       }));
   });
 });
