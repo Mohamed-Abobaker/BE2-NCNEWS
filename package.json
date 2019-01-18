@@ -16,7 +16,8 @@
     "migrate:make": "knex migrate:make",
     "migrate:latest": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
-    "lint:fix": "eslint --fix ./"
+    "lint:fix": "eslint ./ --fix",
+    "setup:dbs": "psql -f ./db/nc_knews.sql"
   },
   "repository": {
     "type": "git",

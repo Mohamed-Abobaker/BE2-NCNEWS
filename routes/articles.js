@@ -2,7 +2,7 @@ const articlesRouter = require('express').Router();
 const {
   getArticles,
   getArticleById,
-  patchVotesByArticle,
+  patchArticleVotes,
   deleteArticleById,
   getCommentsByArticle,
   postCommentByArticle_id,
@@ -19,7 +19,7 @@ articlesRouter
 articlesRouter
   .route('/:article_id')
   .get(getArticleById)
-  .patch(patchVotesByArticle)
+  .patch(patchArticleVotes)
   .delete(deleteArticleById)
   .all(handle405);
 

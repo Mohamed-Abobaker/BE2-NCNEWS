@@ -2,7 +2,7 @@ const connection = require('../db/connection');
 
 const getArticles = (req, res, next) => {
   const {
-    limit = 10, sort_by = 'created_at', order = 'desc', p = 0, ...restOf
+    limit = 10, sort_by = 'created_at', order = 'desc', p = 0,
   } = req.query;
   const page = p ? (p - 1) * limit : 0;
   connection
@@ -10,7 +10,6 @@ const getArticles = (req, res, next) => {
       'articles.username as author',
       'articles.title',
       'articles.article_id',
-      'articles.body',
       'articles.votes',
       'articles.created_at',
       'articles.topic',
@@ -51,9 +50,9 @@ const getArticleById = (req, res, next) => {
     .catch(next);
 };
 
-const patchVotesByArticle = (req, res, next) => {
+const patchArticleVotes = (req, res, next) => {
   const { article_id } = req.params;
-  const { inc_votes } = req.body;
+  const { inc_votes = 0 } = req.body;
   connection('articles')
     .where('articles.article_id', article_id)
     .increment('votes', inc_votes)
@@ -71,7 +70,8 @@ const deleteArticleById = (req, res, next) => {
     .where('articles.article_id', article_id)
     .del()
     .returning('*')
-    .then((result) => {
+    .then(([result]) => {
+      if (!result) return Promise.reject({ status: 404, msg: 'Page not found!' });
       res.status(204).send(result);
     })
     .catch(next);
@@ -117,9 +117,8 @@ const postCommentByArticle_id = (req, res, next) => {
 };
 
 const patchCommentById = (req, res, next) => {
-  const { article_id } = req.params;
-  const { comment_id } = req.params;
-  const { inc_votes } = req.body;
+  const { article_id, comment_id } = req.params;
+  const { inc_votes = 0 } = req.body;
 
   connection('comments')
     .where({
@@ -136,8 +135,7 @@ const patchCommentById = (req, res, next) => {
 };
 
 const deleteCommentById = (req, res, next) => {
-  const { article_id } = req.params;
-  const { comment_id } = req.params;
+  const { article_id, comment_id } = req.params;
 
   connection('comments')
     .where({
@@ -156,7 +154,7 @@ const deleteCommentById = (req, res, next) => {
 module.exports = {
   getArticles,
   getArticleById,
-  patchVotesByArticle,
+  patchArticleVotes,
   deleteArticleById,
   getCommentsByArticle,
   postCommentByArticle_id,

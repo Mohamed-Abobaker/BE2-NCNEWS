@@ -47,6 +47,18 @@ describe('/api', () => {
           'error: insert into "topics" ("description", "title") values ($1, $2) returning * - column "title" of relation "topics" does not exist',
         );
       }));
+    it('POST status: 422 when duplicate slug is used', () => request
+      .post('/api/topics')
+      .send({
+        description: 'The game of the year',
+        slug: 'mitch',
+      })
+      .expect(422)
+      .then(({ body }) => {
+        expect(body.msg).to.eql(
+          'error: insert into "topics" ("description", "slug") values ($1, $2) returning * - duplicate key value violates unique constraint "topics_pkey"',
+        );
+      }));
   });
   describe('GET api/topics/:topic/articles', () => {
     it('GET status:200 & responds with an array of article objects of given a topic', () => request
@@ -131,7 +143,6 @@ describe('/api', () => {
         const { articles } = body;
         expect(articles.length).to.equal(12);
         expect(articles[0]).to.have.all.keys(
-          'body',
           'title',
           'author',
           'article_id',
@@ -215,6 +226,12 @@ describe('/api', () => {
       .then(({ body }) => {
         const { articles } = body;
         expect(articles).to.have.length(11);
+      }));
+    it('DELETE status: 404 when non-existent id used', () => request
+      .delete('/api/articles/704')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).to.eql('Page not found!');
       }));
   });
   describe('GET /api/articles/:article_id/comments', () => {
@@ -352,6 +369,14 @@ describe('/api', () => {
         expect(body.msg).to.eql(
           'error: update "comments" set "votes" = "votes" + 77 where "article_id" = $1 and "comment_id" = $2 returning * - invalid input syntax for integer: "abc"',
         );
+      }));
+    it('PATCH status:200 with no body & responds with an unmodified comment ', () => request
+      .patch('/api/articles/9/comments/1')
+      .send({})
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.votes).to.eql(16);
       }));
   });
   describe('DELETE /api/articles/:article_id/comments/:comment_id', () => {
