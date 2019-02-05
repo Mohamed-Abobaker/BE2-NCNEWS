@@ -85,6 +85,7 @@ const getCommentsByArticle = (req, res, next) => {
   const page = p ? (p - 1) * limit : 0;
   connection
     .select(
+      'comments.comment_id',
       'comments.username as author',
       'comments.body',
       'comments.article_id',
