@@ -247,6 +247,7 @@ describe('/api', () => {
           'author',
           'article_id',
           'votes',
+          'comment_id',
           'created_at',
         );
       }));
@@ -263,7 +264,7 @@ describe('/api', () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).to.eql(
-          'error: select "comments"."username" as "author", "comments"."body", "comments"."article_id", "comments"."votes", "comments"."created_at" from "comments" where "article_id" = $1 order by "created_at" desc limit $2 - invalid input syntax for integer: "abc"',
+          'error: select "comments"."comment_id", "comments"."username" as "author", "comments"."body", "comments"."article_id", "comments"."votes", "comments"."created_at" from "comments" where "article_id" = $1 order by "created_at" desc limit $2 - invalid input syntax for integer: "abc"',
         );
       }));
     it('GET Status:404 when article id does not exist', () => request
