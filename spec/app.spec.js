@@ -13,6 +13,7 @@ describe('/api', () => {
     .then(() => connection.seed.run()));
 
   after(() => connection.destroy());
+
   describe('GET api/topics', () => {
     it('GET status: 200 & responds with an array of topics objects', () => request
       .get('/api/topics')

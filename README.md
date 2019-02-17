@@ -2,66 +2,126 @@
 
 ## Northcoders News API
 
-### Background
+## Description
 
-We will be building the API to use in the Northcoders News Sprint during the Front End block of the course.
+Welcome to NC -Knews!
 
-Our database will be PSQL, and you will interact with it using [Knex](https://knexjs.org).
+NC-Knews is an API for the back end of a news article aggregator site (in the style of Reddit). It enables writing commenting, deleting and voting articles.
 
-### NOTE:
+## Getting Started
 
-For this sprint ensure you have the eslint extension installed in VS-Code as it will help to enforce best practices when you are writing your code.
+This is a guide to help you get set up with the API so that you can use it locally.
 
-### Step 1 - Seeding
+## Prerequisites
 
-Data has been provided for both testing and development environments so you will need to write a seed function to seed your database. You should think about how you will write your seed file to use either test data or dev data depending on the environment that you're running in.
+- Node.js v10.9.0
+- Postgres v10.5
 
+## Installing
 
-1. You should have separate tables for topics, articles, users and comments, and you will need to think carefully about the order in which you seed your data.
+First run your termial and cd into the location that you want to store the folder. Then run the following commands in your terminal.
 
-- Each topic should have:
+```http
+git clone https://github.com/Mohamed-Abobaker/BE2-NCNEWS.git
+cd BE2-NCNEWS
+npm install
+```
 
-  - `slug` field which is a unique string that acts as the table's primary key
-  - `description` field which is a string giving a brief description of a given topic
+Then open the file in your preferred code editor.
 
-- Each user should have:
+In the package.json file you will find lots of handy ready made scripts to help with the setup process.
 
-  - `username` which is the primary key & unique
-  - `avatar_url`
-  - `name`
+In the terminal run the following command
 
-- Each article should have:
-  - `article_id` which is the primary key
-  - `title`
-  - `body`
-  - `votes` defaults to 0
-  - `topic` field which references the slug in the topics table
-  - `username` field that references a user's primary key.
-  - `created_at` defaults to the current date
+```http
+npm run create:config
+```
 
-* Each comment should have:
-  - `comment_id` which is the primary key
-  - `username` field that references a user's primary key
-  - `article_id` field that references an article's primary key
-  - `votes` defaults to 0
-  - `created_at` defaults to the current date
-  - `body`
+This will create a knexfile.js which you will need to modify.
 
-- NOTE: psql expects Date types to be in a date format - not a timestamp! However, you can easily turn a timestamp into a date using js...
+Change the client to 'pg' and the database name to 'nc_knews'
 
+If you are using Linux then you will also need to add a username and password to the connection object (as can be seen below) and make sure that this file is in git ignore.
 
-### Step 2 - Building and Testing
+A full example can be seen below.
 
-1.  Build your Express app
-2.  Mount an API Router onto your app
-3.  Define the routes described below
-4.  Define controller functions for each of your routes.
-5.  Use proper project configuration from the offset, being sure to treat development and test differently.
-6.  Test each route **as you go**, checking both successful requests and the variety of errors you could expect to encounter.
+```http
+module.exports = {
 
-**HINT** You will need to take advantage of knex migrations in order to efficiently test your application.
+ development: {
+   client: 'pg',
+   connection: {
+     database: 'nc_knews',
+     password: 'your_password',
+     user: 'your_username',
+   },
+   migrations: {
+     directory: './db/migrations',
+   },
+   seeds: {
+     directory: './db/seeds',
+   },
+ },
+ test: {
+   client: 'pg',
+   connection: {
+     password: 'your_password',
+     user: 'your_username',
+     database: 'nc_knews_test',
+   },
+   migrations: {
+     directory: './db/migrations',
+   },
+   seeds: {
+     directory: './db/seeds',
+   },
+ },
+};
+```
 
-### Routes
+For more information see [knex documentation](https://knexjs.org/#Installation-node)
+
+---
+
+Create an api using express to host the Northcoders news. Our database will be PSQL, and you will interact with it using [Knex](https://knexjs.org).
+
+## Running the development database from a browser or postman
+
+In your terminal run the following commands
+
+```https
+npm run seed:db
+npm run dev
+```
+
+Then in your browser or using postman use localhost:9090/api and try out some of the endpoints from the displayed page.
+
+---
+
+### Running the tests
+
+To see the available tests navigate to app.spec.js in the spec folder. All endpoints have been tested thorougly.
+
+To run tests type the following into the command line:
+
+```https
+npm test
+```
+
+---
+
+## Deployment
+
+Hosted on [Heroku](https://nc-knews777.herokuapp.com/api)
+
+## Built With
+
+- Node - JS runtime
+- Express - Web application framework
+- Knex - SQL query builder
+- PostgreSQL - Relational database
+
+## Endpoints
 
 Your server should have the following end-points:
 
@@ -88,22 +148,18 @@ GET /api/topics/:topic/articles
   - `title`
   - `article_id`
   - `votes`
-  - `comment_count` which is the accumulated count of all the comments with this article_id. You should make use of knex queries in order to achieve this.
+  - `total_count` which is the accumulated count of all the comments with this article_id. You should make use of knex queries in order to achieve this.
   - `created_at`
   - `topic`
 
 Queries
 
 - This route should accept the following queries:
+
   - `limit`, which limits the number of responses (defaults to 10)
   - `sort_by`, which sorts the articles by any valid column (defaults to date)
   - `p`, stands for page which specifies the page at which to start (calculated using limit)
-  - `order`, which can be set to `asc` or `desc` for ascending or descending  (defaults to descending)
-
-
-## IMPORTANT:
-* Both `comments` and `articles` data in the test-data are given ordered in descending order of time : this will be useful to you when it comes to writing your tests!
-
+  - `order`, which can be set to `asc` or `desc` for ascending or descending (defaults to descending)
 
 ```http
 POST /api/topics/:topic/articles
@@ -123,7 +179,7 @@ GET /api/articles
   - `article_id`
   - `body`
   - `votes`
-  - `comment_count` which is the accumulated count of all the comments with this article_id. You should make use of knex queries in order to achieve this.
+  - `total_count` which is the accumulated count of all the comments with this article_id. You should make use of knex queries in order to achieve this.
   - `created_at`
   - `topic`
 
@@ -133,8 +189,7 @@ Queries
   - `limit`, which limits the number of responses (defaults to 10)
   - `sort_by`, which sorts the articles by any valid column (defaults to date)
   - `p`, stands for page which specifies the page at which to start (calculated using limit)
-  - `order`, which can be set to `asc` or `desc` for ascending or descending  (defaults to descending)
-
+  - `order`, which can be set to `asc` or `desc` for ascending or descending (defaults to descending)
 
 ```http
 GET /api/articles/:article_id
@@ -147,7 +202,7 @@ GET /api/articles/:article_id
   - `title`
   - `votes`
   - `body`
-  - `comment_count` which is the count of all the comments with this article_id. A particular SQL clause is useful for this job!
+  - `total_count` which is the count of all the comments with this article_id. A particular SQL clause is useful for this job!
   - `created_at`
   - `topic`
 
@@ -156,11 +211,12 @@ PATCH /api/articles/:article_id
 ```
 
 - accepts an object in the form `{ inc_votes: newVote }`
+
   - `newVote` will indicate how much the `votes` property in the database should be updated by
     E.g `{ inc_votes : 1 }` would increment the current article's vote property by 1
     `{ inc_votes : -100 }` would decrement the current article's vote property by 100
 
-- this end-point should respond with the article you have just updated    
+- this end-point should respond with the article you have just updated
 
 ```http
 DELETE /api/articles/:article_id
@@ -185,10 +241,10 @@ Queries
 
 - This route should accept the following queries:
 
-* limit, which limits the number of responses (defaults to 10)
-* sort_by, which sorts the articles by any valid column (defaults to date)
-* p, stands for page which specifies the page at which to start (calculated using limit)
-* sort_ascending, when "true" returns the results sorted in ascending order (defaults to descending)
+  - limit, which limits the number of responses (defaults to 10)
+  - sort_by, which sorts the articles by any valid column (defaults to date)
+  - p, stands for page which specifies the page at which to start (calculated using limit)
+  - sort_ascending, when "true" returns the results sorted in ascending order (defaults to descending)
 
 ```http
 POST /api/articles/:article_id/comments
@@ -202,6 +258,7 @@ PATCH /api/articles/:article_id/comments/:comment_id
 ```
 
 - accepts an object in the form `{ inc_votes: newVote }`
+
   - `newVote` will indicate how much the `votes` property in the database should be updated by
     E.g `{ inc_votes : 1 }` would increment the current article's vote property by 1
     `{ inc_votes : -1 }` would decrement the current article's vote property by 1
@@ -239,14 +296,8 @@ GET /api/users/:username
 GET /api
 ```
 
-- Serves JSON describing all the available endpoints on your API
-
-### Step 3 - Hosting
-
-Make sure your application and your database is hosted using heroku
-
-### Step 4 - Preparing for your review and portfolio
-
-Finally, you should write a README for this project (and remove this one). The README should be broken down like this: https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
-
-It should also include the link where your herokuapp is hosted.
+- should respond with an array ob end-point objects
+- each end-point should have
+  - `path`
+  - `description`
+  - `method`
